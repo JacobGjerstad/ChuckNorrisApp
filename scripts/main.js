@@ -19,10 +19,34 @@ function fetchJoke() {
     loaderImg.classList.add("loader");
     var request = new XMLHttpRequest();
     request.onreadystatechange = handleJokeResponse;
+    var url = "https://api.icndb.com/jokes/random";
+    if (isCategorySelected()) {
+        var category = getSelectedCategory();
+        // .../jokes/random?limitTo=[nerdy]
+        url += "?limitTo=[" + category + "]";
+    }
+    console.log(url);
     // Set URL to send request to
-    request.open("GET", "https://api.icndb.com/jokes/random");
+    request.open("GET", url);
     // Initiate request
     request.send();
+}
+function isCategorySelected() {
+    var list = document.getElementById("cat-list");
+    if (list.selectedIndex == 0)
+        return false;
+    else
+        return true;
+}
+/**
+ * Return the single category that
+ * is selected
+ */
+function getSelectedCategory() {
+    var list = document.getElementById("cat-list");
+    var index = list.selectedIndex;
+    var cat = list.options[index].text;
+    return cat;
 }
 function handleJokeResponse() {
     var request = this;
@@ -81,7 +105,16 @@ function populateCategories() {
         if (this.readyState == 4 && this.status == 200) {
             var categories = JSON.parse(this.responseText).value;
             console.log(categories);
+            populateCatDropdown(categories);
         }
     };
     request.send();
+}
+function populateCatDropdown(categories) {
+    var list = document.getElementById("cat-list");
+    for (var i = 0; i < categories.length; i++) {
+        var option = document.createElement("option");
+        option.text = categories[i];
+        list.appendChild(option); // add option to the select
+    }
 }
